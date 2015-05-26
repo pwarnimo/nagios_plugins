@@ -72,8 +72,6 @@ class Sensor {
 	public static function getSensorData($ipaddr, $username, $password, $min, $max, $tsensor) {
 		$xml = self::recvXML($ipaddr, $username, $password);
 
-		//print_r(self::cmpResults(10,20,30));
-
 		foreach ($xml->sns as $sensor) {
 			if ($sensor->attributes()->id == $tsensor) {
 				return self::cmpResults($sensor->attributes()->val, $min, $max);
@@ -89,8 +87,6 @@ $shortopts = "u:p:i:s:m:M:";
 $options = getopt($shortopts);
 
 if (count($options) === 6) {
-	//printf($options["u"] . "\n");
-	
 	$data = Sensor::getSensorData($options["i"], $options["u"], $options["p"], $options["m"], $options["M"], $options["s"]);
 	
 	switch ($options["s"]) {

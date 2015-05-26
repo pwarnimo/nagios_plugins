@@ -1,0 +1,74 @@
+README FOR THE CHECK_TEMP_HUM_TH2E CHECKSCRIPT
+----------------------------------------------
+
+1. LICENSE
+
+check_temp_hum_th2e - A checkscript for NAGIOS.
+Script written by Pol Warnimont.
+Copyright (C) 2015  ASTRON Buildings S.A.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+2. PREREQUISITES
+
+In order to run this script, you will need to have PHP-CLI installed on
+your system. The following version of PHP-CLI have been used for the 
+development of this script:
+
+	Debian 8.0 Jessie:
+		
+		Name           Version      Architecture
+		==============-============-============
+		php5           5.6.7+dfsg-1 all
+
+	SUSE Linux Enterprise Server 11 SP3:
+		
+		Name        Summary              Vers. Inst.
+		----        -------              -----------
+		php53       PHP5 Core Files      5.3.17
+
+Please note that this plugin may work on other systems. It has been 
+currently only tested under Debian 7 - 8 and SLES11.
+
+3. INSTALLATION
+
+Simply copy the plugin into the NAGIOS plugins folder on your system
+and set the execution rights on the script for the NAGIOS user:
+
+cp check_temp_hum_th2e <plugins dir>
+chmod ug+x <plugins dir>/check_temp_hum_th2e
+
+4. RUNNING THE SCRIPT
+
+The following parameters must be supplied to the script. Please note
+that you need the user credentials for the web interface of the
+device because the script needs to fetch the XML data from the
+sensor device.
+
+ -u <username>
+ -p <password>
+ -i <ip address>
+ -s <1..2>
+      1 = Temperature
+		2 = Humidity
+ -m <warning value>
+ -M <critical value>
+
+5. QUESTIONS
+
+For any questions regarding this script, please send an email to the
+maintainer of this script:
+
+	Pol Warnimont <p.warnimont@astron.biz>
+	https://github.com/pwarnimo/nagios_plugins
