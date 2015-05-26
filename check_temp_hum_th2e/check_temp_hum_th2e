@@ -1,0 +1,117 @@
+#!/usr/bin/php
+<?php
+/*
+ * Script      : check_temp_hum_th2e
+ * Author(s)   : Pol Warnimont
+ * Create date : 2015-05-26
+ * Version     : 2.0
+ *
+ * Description : A plugin for receiving the temperature or humidity
+ *               from TH2E sensor devices.
+ *
+ * Changelog
+ * ---------
+ *  2015-05-26 : Modified script for publishing.
+ *
+ * License information
+ * -------------------
+ *  Copyright (C) 2015  ASTRON Buildings S.A.
+ *  
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+class Sensor {
+	private function recvXML($ipaddr, $username, $password) {
+		$context = stream_context_create(array(
+			"http" => array(
+				"header" => "Authorization: Basic " . base64_encode($username . ":" . $password)
+			)
+		));
+		$data = file_get_contents("http://" . $ipaddr . "/fresh.xml", false, $context);
+
+		return simplexml_load_string($data);
+	}
+
+	private function cmpResults($result, $min, $max) {
+		$tmpRes = intval($result);
+		$arrResult = array();
+
+		if (($tmpRes < $max) && ($tmpRes < $min)) {
+			$arrResult["prefix"] = "OK";
+			$arrResult["excode"] = 0;
+		}
+		else if (($tmpRes < $max) && ($tmpRes >= $min)) {
+			$arrResult["prefix"] = "WARN";
+			$arrResult["excode"] = 1;
+		}
+		else if (($tmpRes >= $max) && ($tmpRes > $min)) {
+			$arrResult["prefix"] = "CRIT";
+			$arrResult["excode"] = 2;
+		}
+		else {
+			$arrResult["prefix"] = "UNKW";
+			$arrResult["excode"] = 3;
+		}
+
+		$arrResult["result"] = $result;
+
+		return $arrResult;
+	}
+
+	public static function getSensorData($ipaddr, $username, $password, $min, $max, $tsensor) {
+		$xml = self::recvXML($ipaddr, $username, $password);
+
+		//print_r(self::cmpResults(10,20,30));
+
+		foreach ($xml->sns as $sensor) {
+			if ($sensor->attributes()->id == $tsensor) {
+				return self::cmpResults($sensor->attributes()->val, $min, $max);
+			}
+		}
+	}
+}
+
+// SCRIPT ENTRY POINT
+
+$shortopts = "u:p:i:s:m:M:";
+
+$options = getopt($shortopts);
+
+if (count($options) === 6) {
+	//printf($options["u"] . "\n");
+	
+	$data = Sensor::getSensorData($options["i"], $options["u"], $options["p"], $options["m"], $options["M"], $options["s"]);
+	
+	switch ($options["s"]) {
+		case 1:
+			$strRet = "%s: Room temperature is %s °C | temperature=%s,%s,%s";
+		break;
+
+		case 2:
+			$strRet = "%s: Room humidity is at %s%% | humidity=%s,%s,%s";
+		break;
+	}
+
+	printf($strRet, $data["prefix"], $data["result"], $data["result"], $options["m"], $options["M"]);
+
+	exit($data["excode"]);
+}
+else {
+	printf("Syntax error!\nUsage: %s -arg1 -arg2 ...\n\n", $argv[0]);
+	printf("The following parameters must be specified:\n -u <username>\n -p <password>\n -i <ip address>\n -s <1..2>\n    1 = Temperature\n    2 = Humidity\n -m <warning value>\n -M <critical value>\n\n");
+	printf("Written by Warnimont Pol\nCopyright (C) 2015  ASTRON Buildings S.A.\nThe check_temp_hum_th2e script comes with ABSOLUTELY NO WARRANTY!\n");
+	printf("Please visit https://github.com/pwarnimo/nagios_plugins for licensing informations.\n");
+
+	exit(1);
+}
