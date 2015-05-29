@@ -4,7 +4,7 @@
  * Script      : check_temp_hum_th2e
  * Author(s)   : Pol Warnimont
  * Create date : 2015-05-26
- * Version     : 2.0
+ * Version     : 2.1
  *
  * Description : A plugin for receiving the temperature or humidity
  *               from TH2E sensor devices.
@@ -12,6 +12,7 @@
  * Changelog
  * ---------
  *  2015-05-26 : Modified script for publishing.
+ *  2015-05-29 : Fixed perfdata output.
  *
  * License information
  * -------------------
@@ -91,11 +92,11 @@ if (count($options) === 6) {
 	
 	switch ($options["s"]) {
 		case 1:
-			$strRet = "%s: Room temperature is %s °C | temperature=%s,%s,%s";
+			$strRet = "%s: Room temperature is %s °C | temperature=%s;%s;%s";
 		break;
 
 		case 2:
-			$strRet = "%s: Room humidity is at %s%% | humidity=%s,%s,%s";
+			$strRet = "%s: Room humidity is at %s%% | humidity=%s;%s;%s";
 		break;
 	}
 
